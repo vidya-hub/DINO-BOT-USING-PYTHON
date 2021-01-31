@@ -1,13 +1,11 @@
-# import re
 from mss import mss
 import cv2
+import pyautogui
 from PIL import Image
 import numpy as np
 from time import time
 import time
-from scipy.spatial import distance as dist
-# import grabscreen
-
+import math
 
 sct = mss()
 
@@ -77,6 +75,14 @@ for i in range(1, 5):
     print(i)
     time.sleep(1)
 
+
+def findcontourcenter(contour):
+    M = cv2.moments(contour)
+    cx = int(M["m10"] / M["m00"])
+    cy = int(M["m01"] / M["m00"])
+    return (cx, cy)
+
+
 while True:
     cap = grabthescreen()
     # cap = cv2.imread("dinosmall.png")
@@ -88,7 +94,7 @@ while True:
     removednoise = removenoise(result)
     # # contours drawing
     filterlist = filtercontours(removednoise)
-    print(len(filterlist))
+    # print(len(filterlist))
 
     # drawing contours
 
@@ -98,14 +104,21 @@ while True:
             break
     else:
         for item in filterlist:
-            M = cv2.moments(item)
-            cX = int(M["m10"] / M["m00"])
-            cY = int(M["m01"] / M["m00"])
-
             # draw the contour and center of the shape on the image
-            cv2.circle(cap, (cX, cY), 2, (0, 255, 0), -1)
+            cv2.circle(cap, findcontourcenter(item), 2, (0, 255, 0), -1)
         cv2.drawContours(cap, filterlist, -1, (0, 0, 255), 4)
-        cv2.putText(cap, len(filterlist), ())
+        if len(filterlist) >= 2:
+            con1point = findcontourcenter(filterlist[0])
+            con2point = findcontourcenter(filterlist[1])
+
+            distance = (((con1point[0] - con2point[0]) ** 2) +
+                        ((con1point[1] - con2point[1]) ** 2)) ** 0.5
+            cv2.putText(cap, str(round(distance)), (50, 150),
+                        cv2.FONT_HERSHEY_PLAIN, 1,
+                        (209, 80, 255),
+                        1)
+            if(round(distance) >= 80 and round(distance) <= 100):
+                pyautogui.hotkey("up")
         cv2.imshow('image', cap)
         key = cv2.waitKey(1)
         if key == 27:
