@@ -12,7 +12,7 @@ sct = mss()
 
 def grabthescreen():
     sct_img = sct.grab({'mon': 2, 'top': 150, 'left': 900,
-                        'width': 400, 'height': 180})
+                        'width': 200, 'height': 180})
     img = Image.frombytes(
         'RGB', (sct_img.size.width, sct_img.size.height), sct_img.rgb)
     img_bgr = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
@@ -85,7 +85,7 @@ def findcontourcenter(contour):
 
 while True:
     cap = grabthescreen()
-    # cap = cv2.imread("dinosmall.png")
+    # cap = cv2.imread("kaki2.png")
     gray = congray(cap)
     result = removeline(gray)
     # # conv gray
@@ -106,10 +106,26 @@ while True:
         for item in filterlist:
             # draw the contour and center of the shape on the image
             cv2.circle(cap, findcontourcenter(item), 2, (0, 255, 0), -1)
-        cv2.drawContours(cap, filterlist, -1, (0, 0, 255), 4)
+        # cv2.drawContours(cap, filterlist, -1, (0, 0, 255), 4)
+        # cv2.putText(cap, str(round(cv2.contourArea(filterlist[0]))), (50, 150),
+        #             cv2.FONT_HERSHEY_PLAIN, 1,
+        #             (209, 80, 255),
+        #             1)
+        # cv2.putText(cap, str(round(cv2.contourArea(filterlist[1]))), (50, 200),
+        #             cv2.FONT_HERSHEY_PLAIN, 1,
+        #             (209, 80, 255),
+        #             1)
         if len(filterlist) >= 2:
             con1point = findcontourcenter(filterlist[0])
             con2point = findcontourcenter(filterlist[1])
+            # find height
+            height = con1point[1]-con2point[1]
+            # if 35 <= height >= 17:
+            #     cv2.putText(cap, str(round(height)), (50, 200),
+            #                 cv2.FONT_HERSHEY_PLAIN, 1,
+            #                 (209, 80, 255),
+            #                 1)
+            #     pyautogui.hotkey("down")
 
             distance = (((con1point[0] - con2point[0]) ** 2) +
                         ((con1point[1] - con2point[1]) ** 2)) ** 0.5
@@ -117,7 +133,7 @@ while True:
                         cv2.FONT_HERSHEY_PLAIN, 1,
                         (209, 80, 255),
                         1)
-            if(round(distance) >= 80 and round(distance) <= 100):
+            if(round(distance) >= 40 and round(distance) <= 100):
                 pyautogui.hotkey("up")
         cv2.imshow('image', cap)
         key = cv2.waitKey(1)
